@@ -38,7 +38,7 @@
 \RequirePackage{xcolor}
 \RequirePackage{xparse}
 
-\pgfplotsset{compat=1.18}
+%\pgfplotsset{compat=1.18}
 
 
 \usepackage{tocloft} % Include the package
