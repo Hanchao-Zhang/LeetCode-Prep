@@ -1,0 +1,565 @@
+\documentclass{assignmeownt}
+
+
+\coursenumber{LeetCode}
+\coursetitle{Solution Manual}
+\doctitle{}
+\docauthor{Hanchao Zhang}
+
+\begin{document}
+\maketitle
+\thispagestyle{firststyle}
+
+
+\tableofcontents
+\newpage
+
+
+
+\section{Binary Tree}
+
+
+\question{LeetCode 144, preorder traversal}
+\begin{enumerate}
+    \item res append val
+    \item stack append right
+    \item stack append left
+\end{enumerate}
+
+
+\begin{lstlisting}[language=Python, caption=pre-order traversal dfs]
+class Solution:
+    def preorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
+        stack, res = [root], []
+
+        while stack:
+            node = stack.pop()
+            if node:
+                res.append(node.val)
+                stack.append(node.right)
+                stack.append(node.left)
+        
+        return res
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python, caption=pre-order traversal dp]
+
+class Solution:
+    def preorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
+        def dfs(node, res):
+            if node:
+                res.append(node.val)
+                dfs(node.left, res)
+                dfs(node.right, res)
+        
+        res = []
+        dfs(root, res)
+        return res
+\end{lstlisting}
+
+\question{LeetCode 94, inorder traversal}
+
+\textbf{iterative solution}
+\begin{enumerate}
+    \item while cur or stack, stack and keep going to the left node to the last left node
+    \item cur = stack.pop and append to the res, then cur goes to the right
+\end{enumerate}
+
+\textbf{recursive solution}
+\begin{enumerate}
+    \item inorder(node.left, res)
+    \item res.append val
+    \item inorder(node.right, res)
+\end{enumerate}
+
+\begin{lstlisting}[caption = inorder traversal iterative]
+    class Solution:
+    def inorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
+        res = []
+        stack = []
+        cur = root
+
+        while cur or stack:
+            while cur:
+                stack.append(cur)
+                cur = cur.left
+            
+            cur = stack.pop()
+            res.append(cur.val)
+            cur = cur.right
+        
+        return res
+
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=Python, caption=in-order traversal dp]
+class Solution:
+    def inorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
+        
+        def inorder(node, res):
+            if node:
+                inorder(node.left, res)
+                res.append(node.val)
+                inorder(node.right, res)
+            
+        res = []
+        inorder(root, res)
+
+        return res
+
+\end{lstlisting}
+
+\question{LeeCode 145, Postorder Traversal}
+
+\textbf{itervative}
+\begin{enumerate}
+    \item start with root stack, visited False, res empty
+    \item while stack, cur = stack.pop, v = visited.pop
+    \item if cur, if v: res.append(val)
+    \item if cur, if not v: stack cur, visited true, stack cur.right and cur.left and visited both false
+\end{enumerate}
+
+\textbf{recursive}
+\begin{enumerate}
+    \item postorder(node.left, res)
+    \item postorder(node.right, res)
+    \item res.append(node.val)
+\end{enumerate}
+
+\begin{lstlisting}[caption = postorder traversal iterative]
+    class Solution:
+    def postorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
+        stack = [root]
+        visited = [False]
+        res = []
+
+        while stack:
+            cur = stack.pop()
+            v = visited.pop()
+            if cur:
+                if v:
+                    res.append(cur.val)
+                else:
+                    stack.append(cur)
+                    visited.append(True)
+                    stack.append(cur.right)
+                    visited.append(False)
+                    stack.append(cur.left)
+                    visited.append(False)
+        
+        return res
+\end{lstlisting}
+
+\begin{lstlisting}[caption = postorder traversal dp]
+    class Solution:
+    def postorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
+        res = []
+        
+        def postorder(node, res):
+            if node:
+                postorder(node.left, res)
+                postorder(node.right, res)
+                res.append(node.val)
+        
+        postorder(root, res)
+\end{lstlisting}
+
+
+\question{LeetCode 102, level order traversal}
+
+\textbf{recursive}
+\begin{itemize}
+    \item dfs(node, level, levelMap) if not root, return
+    \item if level not in levelMap, levelMap[level] = [node.val]
+    \item if level in levelMap, levelMap[level].append(node.val)
+    \item dfs(node.left, level+1,levelMap), dfs(node.right, level+1, levelMap)
+    \item dfs(root, 0, levelMap)
+    \item return [x for x in levelMap.keys()]
+\end{itemize}
+
+\textbf{iterative}
+\begin{itemize}
+    \item q with deque([root]), while root
+    \item level with empty list, for loop in range(len(q))
+    \item node = q.popleft, level append node.val, if left q append left, if right, q append right
+    \item result append level
+\end{itemize}
+
+\begin{lstlisting}[caption = level ordr traversal dp]
+    class Solution:
+    def dfs(self, node, level, levelMap):
+        if not node:
+            return
+        
+        if level not in levelMap:
+            levelMap[level] = [node.val]
+        else:
+            levelMap[level].append(node.val)
+            
+        self.dfs(node.left, level + 1, levelMap)
+        self.dfs(node.right, level + 1, levelMap)
+
+        
+    def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:
+        levelMap = {}
+        self.dfs(root, 0, levelMap)
+        return [levelMap[level] for level in sorted(levelMap.keys())]
+    
+        
+
+\end{lstlisting}
+
+
+\begin{lstlisting}[caption = level order traversal bfs]
+class Solution:
+    def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:
+
+        if not root:
+            return root
+
+        # bfs
+        from collections import deque
+
+        # create queue and res for return
+        q = deque()
+        q.append(root)
+        res = []
+
+        while q:
+            level = []
+            for _ in range(len(q)):
+                node = q.popleft()
+                level.append(node.val)
+
+                if node.left:
+                    q.append(node.left)
+                
+                if node.right:
+                    q.append(node.right)
+            res.append(level)
+        return res
+                    
+\end{lstlisting}
+
+\question{LeetCode 104: Maxium Depth}
+
+\textbf{recursive dfs}
+\begin{itemize}
+    \item if not root, return 0
+    \item return max(depth(root.left), depth(root.right)) + 1
+\end{itemize}
+\textbf{bfs}
+\begin{itemize}
+    \item general bfs
+    \item count the level number 
+\end{itemize}
+\textbf{iterative dfs}
+\begin{itemize}
+    \item stack = [[root, 1]]
+    \item while stack, pop the depth and root from stack
+    \item res = max(res, depth), append([node.left, depth+1]), append([node.right, depth+1])
+    \item return res
+\end{itemize}
+
+\begin{lstlisting}[caption = dfs recursive]
+    class Solution:
+    def maxDepth(self, root: Optional[TreeNode]) -> int:
+        if not root:
+            return 0
+            
+        return max(self.maxDepth(root.left), self.maxDepth(root.right)) + 1
+\end{lstlisting}
+
+\begin{lstlisting}[caption = bfs]
+    class Solution:
+    def maxDepth(self, root: Optional[TreeNode]) -> int:
+        from collections import deque
+        if not root:
+            return 0
+        
+        q = deque([root])
+        count = 0
+        while q:
+            for _ in range(len(q)):
+                cur = q.popleft()
+                if cur.left:
+                    q.append(cur.left)
+                if cur.right:
+                    q.append(cur.right)
+            
+            count += 1
+
+        return count
+
+\end{lstlisting}
+
+\begin{lstlisting}[caption = dfs iterative]
+    class Solution:
+    def maxDepth(self, root: Optional[TreeNode]) -> int:
+        stack = [[root, 1]]
+        res = 0
+
+        while stack:
+            node, depth = stack.pop()
+            if node:
+                res = max(res, depth)
+                stack.append([node.left, depth + 1])
+                stack.append([node.right, depth + 1])
+
+        return res
+\end{lstlisting}
+
+
+
+\question{LeetCode 101, symmetric tree}
+\textbf{recursive}
+\begin{enumerate}
+    \item if not node1 and not node2 return True
+    \item if only node1 or node2 exist, return false
+    \item if node1.val == node2.val, check the node1.left, node2.right and node1.right and node2.left
+\end{enumerate}
+
+\textbf{iterative}
+\begin{itemize}
+    \item split to left and right node
+    \item bfs root1 left right, node2 right left, and see if the tree are the same
+\end{itemize}
+
+\begin{lstlisting}[caption= recursion]
+    class Solution:
+    def check_mirror(self, node1, node2):
+        if not node1 and not node2:
+            return True
+
+        if (node1 and not node2) or (not node1 and node2):
+            return False
+        
+        if node1.val == node2.val:
+            return self.check_mirror(node1.left, node2.right) and self.check_mirror(node1.right, node2.left)
+
+    def isSymmetric(self, root: Optional[TreeNode]) -> bool:
+        return self.check_mirror(root, root)
+
+\end{lstlisting}
+
+\begin{lstlisting}[caption=iterative]
+    class Solution:
+    def check_mirror(self, node1, node2):
+        if root.left and not root.right:
+            return False
+        elif root.right and not root.left:
+            return False
+        elif not root.left and not root.right:
+            return True
+        leftT,rightT = [root.left.val],[root.right.val]
+        q1,q2 = deque(),deque()
+        q1.append(root.left)
+        q2.append(root.right)
+        while q1:
+            node = q1.popleft()
+            if node.left:
+                leftT.append(node.left.val)
+                q1.append(node.left)
+            if not node.left:
+                leftT.append(1000)
+            if node.right:
+                leftT.append(node.right.val)
+                q1.append(node.right)
+            if not node.right:
+                leftT.append(1000)
+        while q2:
+            node = q2.popleft()
+            if node.right:
+                rightT.append(node.right.val)
+                q2.append(node.right)
+            if not node.right:
+                rightT.append(1000)
+            if node.left:
+                rightT.append(node.left.val)
+                q2.append(node.left)
+            if not node.left:
+                rightT.append(1000)
+        return leftT==rightT
+
+\end{lstlisting}
+
+\question{LeetCode 114, path sum}
+\textbf{recursive}
+\begin{enumerate}
+    \item if not root, return False
+    \item targetsum - node.val
+    \item if the end of leaves, not node.left and node.right check the left and right with targetsum hasPathSum(root.left, targetSum) or hasPathSum(root.right, targetSum)
+\end{enumerate}
+
+\begin{lstlisting}[caption=path sum recursion]
+    class Solution:
+    def hasPathSum(self, root: Optional[TreeNode], targetSum: int) -> bool:
+        if not root:
+            return False
+        
+        targetSum -= root.val
+        if not root.left and not root.right:
+            return targetSum == 0
+
+        return self.hasPathSum(root.left, targetSum) or self.hasPathSum(root.right, targetSum)
+
+\end{lstlisting}
+
+
+\question{LeetCode 250, count univalue subtree}
+\begin{enumerate}
+    \item if not node, return True, it is univalue
+    \item go dfs(node.left) dfs(node.right), if both of them are false, return false
+    \item if the node.left.val exist and does not equal to node.val, not a univalue subtree, return false
+    \item if the node.right.val exist and does not equal to node.val, not a univalue subtree, return false
+    \item otherwise, count += 1, and return True
+\end{enumerate}
+
+\begin{lstlisting}
+    class Solution:
+    def countUnivalSubtrees(self, root: Optional[TreeNode]) -> int:
+        self.count = 0
+
+        def dfs(node):
+            if not node:
+                return True
+
+            l = dfs(node.left)
+            r = dfs(node.right)
+            
+            if not l or not r:
+                return False
+            
+            if node.left and node.val != node.left.val:
+                return False
+            
+            if node.right and node.val != node.right.val:
+                return False
+            
+
+            self.count += 1
+
+            return True
+        
+        dfs(root)
+
+        return self.count
+\end{lstlisting}
+
+
+\question{LeetCode 106, construct binary tree, inorder and postorder}
+\begin{enumerate}
+    \item Hashmap for inorder, number: index
+    \item if l>r return None
+    \item root = TreeNode(postorder.pop)
+    \item get index of root for inorder indx = Hashmap[root.val]
+    \item root.right = helper(idx+1, r)
+    \item root.left = helper(l, idx-1)
+    \item return root, return helper(0, len(inorder)-1)
+\end{enumerate}
+
+
+\begin{lstlisting}[caption=construct binary tree]
+    class Solution:
+    def buildTree(self, inorder: List[int], postorder: List[int]) -> Optional[TreeNode]:
+        inorderIndx = {v:i for i, v in enumerate(inorder)}
+        
+        def helper(l, r):
+
+            if l > r:
+                return None
+
+            root = TreeNode(postorder.pop())
+            idx = inorderIndx[root.val]
+            root.right = helper(idx+1, r)
+            root.left = helper(l, idx-1)
+
+            return root
+        
+        return helper(0, len(inorder) - 1)
+
+
+            
+\end{lstlisting}
+
+\question{LeetCode 105, construct binary tree, preorder and inorder}
+\begin{enumerate}
+    \item HashMap for inorder
+    \item if l>r, return None
+    \item root preorder pop(0)
+    \item find the index of root in inorder
+    \item root.right = helper(idx+1, r)
+    \item root.left = helper(l, idx-1)
+    \item return root, return helper(0, len(inorder) - 1)
+\end{enumerate}
+\begin{lstlisting}
+    class Solution:
+    def buildTree(self, preorder: List[int], inorder: List[int]) -> Optional[TreeNode]:
+        inorderIndex = {v: i for i, v in enumerate(inorder)}
+
+        def helper(l, r):
+            if l > r:
+                return None
+            
+            root = TreeNode(preorder.pop(0))
+            idx = inorderIndex[root.val]
+            root.left = helper(l, idx-1)
+            root.right = helper(idx+1,r)
+            return root
+        
+        return helper(0, len(preorder) - 1)
+        
+\end{lstlisting}
+
+
+
+
+
+% \newpage
+
+
+% \question
+% \questionpart{What sounds does a cat make?}
+% \par Cats can make a `meow', `purr', or `boioioing' sound.
+
+% \bigskip
+
+% \todo{Add more sounds before the cat overlords punish me.}
+
+% \questionpart{Prove that cats are Gods.}
+% We must prove that cats are Gods.
+
+% \begin{proof}
+%   \par Let us assume for the sake of contradiction that cats are not Gods.
+%   \par This must mean that the world we are living in cannot exist.
+%   \par But the world we are living in does exist.
+%   \par This must mean that our initial assumption that cats are not Gods must be incorrect.
+% \end{proof}
+
+% \par \finalresult{Therefore, cats are Gods.}
+
+% \question{Prove that cats are equal to infinity.}
+% \par We must first prove that cats are a number.
+% \begin{lemma}
+%   Cats are a number.
+% \end{lemma}
+% \begin{proof}
+%   \par Obviously, cats are a number.
+% \end{proof}
+
+% \par Since cats are a number, we can now prove that cats are equal to infinity.
+% \begin{proof}
+%   Let cat be \( x \).
+%   \begin{flalign}
+%              & x = x - 1  &  & \text{(Duh)} \nonumber \\
+%     \implies & x + 1 = x  &  & \nonumber              \\
+%     \implies & x = \infty &  & \nonumber
+%   \end{flalign}
+
+%   \par We can clearly see that \( x = \infty \).
+% \end{proof}
+
+% \par \finalresult{Therefore, cats are equal to infinity.}
+
+\end{document}
